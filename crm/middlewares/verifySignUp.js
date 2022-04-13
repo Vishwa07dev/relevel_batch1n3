@@ -4,6 +4,7 @@
  */
 
 const User = require("../models/user.model")
+const constant = require("../utils/constants");
 
 validateSignupRequest = async (req,res, next) =>{
     //Validate if userName exists
@@ -31,6 +32,43 @@ validateSignupRequest = async (req,res, next) =>{
         })
     }
 
+    if(!req.body.email){
+        return res.status(400).send({
+            message : "Failed !  User Email Id is not provided"
+        })
+    }
+
+    /**
+     * if the email id is already existing
+     */
+
+    const email = await User.findOne({email : req.body.email});
+    if(email!=null){
+        return res.status(400).send({
+            message : "Failed !  Email ID already exists"
+        }) 
+    }
+
+    if(!req.body.password){
+        return res.status(400).send({
+            message : "Failed !  User password is not provided"
+        })
+    }
+
+    /**
+     * Validation for the use type
+     * customer : "CUSTOMER",
+        admin : "ADMIN",
+        engineer
+     */
+    const userType = req.body.userType ;
+    const userTypes = [ constant.userTypes.customer , constant.userTypes.admin, constant.userTypes.engineer]
+    if(userType && !userTypes.includes(userType)){
+        return res.status(400).send({
+            message : "Failed !  User type is not correctly provided"
+        })
+    }
+    
     /**
      * similar validation for all the other fields
      * 
@@ -39,6 +77,12 @@ validateSignupRequest = async (req,res, next) =>{
      * userType
      */
     next(); // give the controll to the controller
+
+    /**
+     * Scope of improving the code :
+     * 
+     *     Validate if the email id is in correct format :  abc@xyz.com   , adcw1313
+     */
 }
 
 module.exports = {
