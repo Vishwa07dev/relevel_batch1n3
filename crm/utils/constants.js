@@ -12,5 +12,16 @@ module.exports = {
         pending : "PENDING",
         approved : "APPROVED",
         rejected : "REJECTED"
+    },
+    ticketStatus : {
+        open : "OPEN",
+        closed : "CLOSED",
+        blocked : "BLOCKED"
+    },
+    ticketPriority : {
+        one : 1,
+        two : 2,
+        three : 3,
+        four : 4
     }
 };
