@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
         type : [mongoose.SchemaTypes.ObjectId],
         ref : "Ticket"
     },
-    ticketAssigned : {
+    ticketsAssigned : {
         type : [ mongoose.SchemaTypes.ObjectId],
         ref : "Ticket"
     }

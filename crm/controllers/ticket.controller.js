@@ -3,6 +3,7 @@ const constants = require("../utils/constants");
 const Ticket = require("../models/ticket.model");
 
 const objectConverter = require("../utils/objectConverter");
+const { ensureIndexes } = require("../models/user.model");
 
 
 /**
@@ -35,7 +36,33 @@ exports.createTicket = async (req, res) => {
 
         const ticket = await Ticket.create(ticketObj);
 
-        return res.status(201).send(objectConverter.ticketResponse(ticket));
+        /**
+         * Ticket is created now
+         * 1. We should update the customer and engineer document
+         */
+
+        /**
+         * Find out the customer
+         */
+        if (ticket) {
+            const user = await User.findOne({
+                userId: req.userId
+            })
+            user.ticketsCreated.push(ticket._id);
+            await user.save();
+
+            /**
+             * Update the Engineer
+             *
+             */
+            engineer.ticketsAssigned.push(ticket._id);
+            await engineer.save();
+
+            return res.status(201).send(objectConverter.ticketResponse(ticket));
+        }
+
+
+
     } catch (err) {
         console.log(err.message);
         return res.status(500).send({
