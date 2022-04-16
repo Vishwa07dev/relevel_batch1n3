@@ -25,7 +25,7 @@ const ticketSchema = new mongoose.Schema({
         required: true,
         default: constants.ticketStatus.open // Possible values : "OPEN/CLOSED/BLOCKED"
     },
-    reporter: {
+    reporter: {  // Who created ticket - userId of the user who created
         type: String
     },
     assignee: {
