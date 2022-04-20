@@ -119,3 +119,63 @@ exports.getAllTickets = async (req, res) => {
     res.status(200).send(objectConverter.ticketListResponse(tickets))
     
 }
+
+/**
+ * contoller to fetch ticket based on id
+ */
+ exports.getOneTicket = async ( req, res) =>{
+     const ticket = await Ticket.findOne({
+         _id : req.params.id
+     });
+
+     res.status(200).send(objectConverter.ticketResponse(ticket));
+ }
+
+ /**
+  * Write the controller to update the ticket
+  * 
+  * TODO :
+  * Move all the validations to the middleware layer
+  */
+
+ exports.updateTicket = async (req, res)=>{
+       
+    // Check if the ticket exists
+    const ticket = await Ticket.find({
+        _id : req.params.id
+    });
+
+    if(ticket == null){
+        return res.status(200).send({
+            message : "Ticket doesn't exist"
+        })
+    }
+
+    /**
+     * Only the ticket request be allowed to update the ticket
+     */
+    const user = User.findOne({
+        userId : req.userId
+    });
+
+    if(!user.ticketsCreated.includes(req.params.id)){
+        return res.status(403).send({
+           message : "Only owner of the ticket is allowed to update"
+        })
+    }
+
+    // Update the attributes of the saved ticket
+
+    ticket.title = req.body.title != undefined ? req.body.title :ticket.title ;
+    ticket.description  = req.body.description != undefined ? req.body.description :ticket.description;
+    ticket.ticketPriority  = req.body.ticketPriority != undefined ? req.body.ticketPriority :ticket.ticketPriority;
+    ticket.status  = req.body.status != undefined ? req.body.status :ticket.status;
+    
+    // Saved the changed ticket
+
+    const updatedTicket = await ticket.save();
+
+    // Return the updated ticket
+
+    return res.status(200).send( objectConverter.ticketResponse(updatedTicket));
+ }
