@@ -81,73 +81,74 @@ exports.createTicket = async (req, res) => {
  * TODO HW : Extension :
  * Using query param, allow the users to
  * filter the list of tickets based on status
+ * 
+ * Depending on the user I need to return differnt list of tickets :
+ * 
+ * 1. ADMIN - Return all tickets
+ * 2. ENGINEER - All the tickets, either created or assigned to him/her
+ * 3. CUSTOMER - All the tickets created by him
  */
 exports.getAllTickets = async (req, res) => {
     /**
      * I want to get the list of all the tickets
      */
     console.log(req.userId);
-
-    const user = await User.findOne({userId : req.userId});
-    console.log(user);
-    if(user.ticketsCreated == null ||user.ticketsCreated.length==0){
-         return res.status(200).send({
-             message : "No tickets created by you !!!"
-         })
+    const queryObj = {};
+    if (req.query.status != undefined) {
+        queryObj.status = req.query.status;
     }
-    /**
-     * I need to get all the ticket ids from 
-     */
-    /**const tickets = [];
-    var count = 0;
-    user.ticketsCreated.forEach(async t=>{
-        ticketSaved = await Ticket.findOne({_id : t});
-        console.log(ticketSaved);
-        tickets.push( ticketSaved);
-        count ++ ;
-        if(count>=user.ticketsCreated.length){
-            res.status(200).send(objectConverter.ticketListResponse(tickets));
-        }
-    });**/
 
-    const tickets = await Ticket.find({
-        _id : {
-            $in : user.ticketsCreated // array of ticket ids
+    const user = await User.findOne({ userId: req.userId });
+    if (user.userType == constants.userTypes.admin) {
+        //Return all the tickets
+        // No need to change anything in the query object
+    } else if (user.userType == constants.userTypes.customer) {
+
+        if (user.ticketsCreated == null || user.ticketsCreated.length == 0) {
+            return res.status(200).send({
+                message: "No tickets created by you !!!"
+            })
         }
-    });
+
+        queryObj._id = {
+            $in: user.ticketsCreated // array of ticket ids
+        }
+
+    }
+    const tickets = await Ticket.find(queryObj);
 
     res.status(200).send(objectConverter.ticketListResponse(tickets))
-    
+
 }
 
 /**
  * contoller to fetch ticket based on id
  */
- exports.getOneTicket = async ( req, res) =>{
-     const ticket = await Ticket.findOne({
-         _id : req.params.id
-     });
-
-     res.status(200).send(objectConverter.ticketResponse(ticket));
- }
-
- /**
-  * Write the controller to update the ticket
-  * 
-  * TODO :
-  * Move all the validations to the middleware layer
-  */
-
- exports.updateTicket = async (req, res)=>{
-       
-    // Check if the ticket exists
-    const ticket = await Ticket.find({
-        _id : req.params.id
+exports.getOneTicket = async (req, res) => {
+    const ticket = await Ticket.findOne({
+        _id: req.params.id
     });
 
-    if(ticket == null){
+    res.status(200).send(objectConverter.ticketResponse(ticket));
+}
+
+/**
+ * Write the controller to update the ticket
+ * 
+ * TODO :
+ * Move all the validations to the middleware layer
+ */
+
+exports.updateTicket = async (req, res) => {
+
+    // Check if the ticket exists
+    const ticket = await Ticket.find({
+        _id: req.params.id
+    });
+
+    if (ticket == null) {
         return res.status(200).send({
-            message : "Ticket doesn't exist"
+            message: "Ticket doesn't exist"
         })
     }
 
@@ -155,27 +156,27 @@ exports.getAllTickets = async (req, res) => {
      * Only the ticket request be allowed to update the ticket
      */
     const user = User.findOne({
-        userId : req.userId
+        userId: req.userId
     });
 
-    if(!user.ticketsCreated.includes(req.params.id)){
+    if (!user.ticketsCreated.includes(req.params.id)) {
         return res.status(403).send({
-           message : "Only owner of the ticket is allowed to update"
+            message: "Only owner of the ticket is allowed to update"
         })
     }
 
     // Update the attributes of the saved ticket
 
-    ticket.title = req.body.title != undefined ? req.body.title :ticket.title ;
-    ticket.description  = req.body.description != undefined ? req.body.description :ticket.description;
-    ticket.ticketPriority  = req.body.ticketPriority != undefined ? req.body.ticketPriority :ticket.ticketPriority;
-    ticket.status  = req.body.status != undefined ? req.body.status :ticket.status;
-    
+    ticket.title = req.body.title != undefined ? req.body.title : ticket.title;
+    ticket.description = req.body.description != undefined ? req.body.description : ticket.description;
+    ticket.ticketPriority = req.body.ticketPriority != undefined ? req.body.ticketPriority : ticket.ticketPriority;
+    ticket.status = req.body.status != undefined ? req.body.status : ticket.status;
+
     // Saved the changed ticket
 
     const updatedTicket = await ticket.save();
 
     // Return the updated ticket
 
-    return res.status(200).send( objectConverter.ticketResponse(updatedTicket));
- }
+    return res.status(200).send(objectConverter.ticketResponse(updatedTicket));
+}
