@@ -12,7 +12,8 @@ module.exports = (email) => {
   const consecutiveSpecialCharacters = /([!-/_])\1/;
   const repeatingAtTheRate = /[@]{2}/;
   const otherSpecialCharacters = /[\( \) \, \: \; \< \> \[ \ \] \{ \} \`]/;
-  const emailStructure = /[a-zA-Z0-9!-/]@[a-zA-Z0-9\-\.].[a-zA-Z0-9\-\.]/; // recipientName@domainName.subdomainName
+  const emailStructure =
+    /[a-zA-Z0-9!-/]{64}@[a-zA-Z0-9\-\.].[a-zA-Z0-9\-\.]{253}/; // recipientName@domainName.subdomainName
   //   ----------------------------------------------
 
   //   Prepare the validation report based on the RegEx match ->
