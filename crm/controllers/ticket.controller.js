@@ -114,6 +114,24 @@ exports.getAllTickets = async (req, res) => {
             $in: user.ticketsCreated // array of ticket ids
         }
 
+    }else{
+
+        /**
+         * 
+         * Assignment  :
+         * 
+         * Approach 1 :  $or ---
+         * 
+         * Approach 2 : in the in clause put both the lists
+         *     ticketsCreated
+         *     ticketsAssigned
+         */
+        //User is of type engineer
+        queryObj._id = {
+            $in: user.ticketsCreated // array of ticket ids
+        };
+        // All the tickets where I am the assignee
+        queryObj.assignee = req.userId
     }
     const tickets = await Ticket.find(queryObj);
 
@@ -136,15 +154,17 @@ exports.getOneTicket = async (req, res) => {
  * Write the controller to update the ticket
  * 
  * TODO :
- * Move all the validations to the middleware layer
+ * 1. Assignee Engineer should also be able to update the ticket
  */
 
 exports.updateTicket = async (req, res) => {
 
     // Check if the ticket exists
-    const ticket = await Ticket.find({
+    const ticket = await Ticket.findOne({
         _id: req.params.id
     });
+
+    console.log(ticket);
 
     if (ticket == null) {
         return res.status(200).send({
@@ -158,20 +178,41 @@ exports.updateTicket = async (req, res) => {
     const user = User.findOne({
         userId: req.userId
     });
-
-    if (!user.ticketsCreated.includes(req.params.id)) {
+    /**
+     * Only checking for the user who has created the ticket
+     * 
+     * 1. ADMIN 
+     * 2. Engineer
+     */
+    console.log(ticket.assignee);
+    
+    /**
+     * If the ticket is not assigned to any engineer, any engineer
+     * can self assign themselves the given ticket
+     */
+    if(ticket.assignee == undefined){
+        ticket.assignee = req.userId;
+    }
+    console.log(req.userId);
+    if ((user.ticketsCreated == undefined || !user.ticketsCreated.includes(req.params.id)) && !(user.userType== constants.userTypes.admin) && !(ticket.assignee == req.userId)) {
         return res.status(403).send({
-            message: "Only owner of the ticket is allowed to update"
+            message: "Only owner of the ticket/engineer assigned/admin is allowed to update"
         })
     }
 
     // Update the attributes of the saved ticket
 
+    console.log(req.body.status);
+
     ticket.title = req.body.title != undefined ? req.body.title : ticket.title;
     ticket.description = req.body.description != undefined ? req.body.description : ticket.description;
     ticket.ticketPriority = req.body.ticketPriority != undefined ? req.body.ticketPriority : ticket.ticketPriority;
     ticket.status = req.body.status != undefined ? req.body.status : ticket.status;
-
+    
+    //Ability to re-assign the ticket
+    if(user.userType== constants.userTypes.admin){
+        ticket.assignee = req.body.assignee != undefined ? req.body.assignee :ticket.assignee ;
+    }
     // Saved the changed ticket
 
     const updatedTicket = await ticket.save();
