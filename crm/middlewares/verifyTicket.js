@@ -5,6 +5,14 @@ const {
 } = require("../utils/constants");
 
 const validateTicketCreationRequest = (req, res, next) => {
+  // Abort any further processing if "title" is not provided
+  // warn : check is not done for the lowest number of characters that needs to be present in the title
+  if (!req.body.title) {
+    return res
+      .status(httpCodes.badRequest)
+      .send({ message: "Title for the issue is not provided" });
+  }
+
   // Abort any further processing if "description" is not provided
   // warn : check is not done for the lowest number of characters that needs to be present in the description
   if (!req.body.description) {
