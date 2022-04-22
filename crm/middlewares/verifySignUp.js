@@ -7,7 +7,7 @@ const User = require("../models/user.model");
 const constant = require("../utils/constants");
 const emailChecker = require("../utils/emailChecker");
 
-validateSignupRequest = async (req, res, next) => {
+const validateSignupRequest = async (req, res, next) => {
   //Validate if userName exists
   if (!req.body.name) {
     return res.status(400).send({
