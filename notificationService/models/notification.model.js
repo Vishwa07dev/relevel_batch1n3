@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const constants = require("../utils/constants");
 
-const contants = require("../utils/constants");
 
 
 const notificationSchema = new mongoose.Schema({

@@ -9,7 +9,7 @@ const Notification = require("../models/notification.model");
 /**
  * Accept a new notification request and retun the tracking id
  */
-exports.acceptNotificationRequest = (req, res) => {
+exports.acceptNotificationRequest =async (req, res) => {
     //Rquest body
     const notificationObj = {
         subject: req.body.subject,
@@ -23,7 +23,7 @@ exports.acceptNotificationRequest = (req, res) => {
 
         res.status(201).send({
             requestId: notifaction.ticketId,
-            status: "Accepted Reques - it's in progress"
+            status: "Accepted Request - it's in progress"
         });
     } catch (err) {
         console.log("Error will accepting a notification request");
