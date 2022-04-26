@@ -31,6 +31,13 @@ require('./routes/ticketNotification.route')(app);
 
 
 /**
+ * Require the cron file
+ */
+require("./crons/cron");
+
+
+
+/**
  * Starting the server
  */
 app.listen(serverConfig.PORT, ()=>{
