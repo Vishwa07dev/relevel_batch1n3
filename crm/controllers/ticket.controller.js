@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const constants = require("../utils/constants");
 const Ticket = require("../models/ticket.model");
+const notificationServiceClient = require("../utils/NotificationServiceClient");
 
 const objectConverter = require("../utils/objectConverter");
 const { ensureIndexes } = require("../models/user.model");
@@ -58,6 +59,16 @@ exports.createTicket = async (req, res) => {
              */
             engineer.ticketsAssigned.push(ticket._id);
             await engineer.save();
+
+
+            /**
+             * Right place to send the email
+             * 
+             * call the notificationService to send the email
+             * 
+             * I need to have a client to call the external service
+             */
+             notificationServiceClient(ticket._id, "Created new ticket :"+ticket._id,ticket.description, user.email+","+engineer.email,user.email);
 
             return res.status(201).send(objectConverter.ticketResponse(ticket));
         }
