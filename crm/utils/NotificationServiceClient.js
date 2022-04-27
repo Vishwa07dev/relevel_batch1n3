@@ -18,7 +18,7 @@ const client = new Client();
  */
 
 module.exports = (ticketId, subject, content, emailIds, requester) => {
-
+    
     /**
      * POST call
      *     - URI  : 127.0.0.1:7777/notifServ/api/v1/notifications
@@ -46,7 +46,7 @@ module.exports = (ticketId, subject, content, emailIds, requester) => {
     }
 
 
-    var req = client.post("127.0.0.1:7777/notifServ/api/v1/notifications",args, (data,response)=>{
+    var req = client.post("http://127.0.0.1:7777/notifServ/api/v1/notifications",args, (data,response)=>{
        console.log("Request Sent");
        console.log(data);
     });
