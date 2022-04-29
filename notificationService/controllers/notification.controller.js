@@ -10,6 +10,8 @@ const Notification = require("../models/notification.model");
  * Accept a new notification request and retun the tracking id
  */
 exports.acceptNotificationRequest = async (req, res) => {
+    
+    console.log('Notifcation requested');
     //Rquest body
     const notificationObj = {
         subject: req.body.subject,
