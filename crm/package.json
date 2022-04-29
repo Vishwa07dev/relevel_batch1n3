@@ -4,7 +4,7 @@
   "description": "CRM backend",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "vimohan",
   "license": "ISC",
@@ -16,5 +16,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.10",
     "node-rest-client": "^3.1.1"
+  },
+  "devDependencies": {
+    "jest": "^28.0.3"
   }
 }
