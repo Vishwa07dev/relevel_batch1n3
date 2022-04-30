@@ -37,6 +37,7 @@ exports.createTicket = async (req, res) => {
         }
 
         const ticket = await Ticket.create(ticketObj);
+        console.log(ticket)
 
         /**
          * Ticket is created now
@@ -68,8 +69,8 @@ exports.createTicket = async (req, res) => {
              * 
              * I need to have a client to call the external service
              */
-             notificationServiceClient(ticket._id, "Created new ticket :"+ticket._id,ticket.description, user.email+","+engineer.email,user.email);
-
+             notificationServiceClient.sendEmail(ticket._id, "Created new ticket :"+ticket._id,ticket.description, user.email+","+engineer.email,user.email);
+             console.log("here");
             return res.status(201).send(objectConverter.ticketResponse(ticket));
         }
 
