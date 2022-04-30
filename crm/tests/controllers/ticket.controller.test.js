@@ -100,5 +100,16 @@ describe("Testing create ticket feature", () => {
 
     });
 
+    it("Not able to create a ticket- Error", ()=>{
+
+
+        /**
+         * res status code : 500
+         * res send message : {
+            message: "Some internal error"
+        }
+         */
+    })
+
 
 });
