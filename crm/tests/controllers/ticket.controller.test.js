@@ -13,6 +13,18 @@ const ticketRequestBody = {
     ticketPriority: 4,
     description: "Test"
 }
+
+const updateRequestBody = {
+    title: "Test",
+    ticketPriority: 4,
+    description: "Test",
+    status : "CLOSED",
+    reporter: 1,
+    assignee: 1,
+    createdAt : Date.now(),
+    updatedAt : Date.now(),
+    _id: "saffs2324"
+}
 const createdTicketBody = {
     _id: "saffs2324",
     title: "Test",
@@ -22,10 +34,11 @@ const createdTicketBody = {
     reporter: 1,
     assignee: 1,
     createdAt : Date.now(),
-    updatedAt : Date.now()
+    updatedAt : Date.now(),
+    save: jest.fn().mockReturnValue(Promise.resolve(updateRequestBody)) //mock it
 }
 const savedUserObj = {
-    userType: "CUSTOMER",
+    userType: "ADMIN",
     password: "323fser4353",
     name: "Test",
     userId: 1,
@@ -146,4 +159,36 @@ describe("Testing update ticket feature", ()=>{
     /**
      * Write a test for the happy flow for updating an existing ticket
      */
+
+    it('testing that the user ticket is successfully updated', async ()=>{
+
+        const req = mockRequest();
+        const res = mockResponse();
+        req.params = {
+            userId : 1
+        }
+        req.body = updateRequestBody;
+
+        //Mocking the other stuffs
+        const ticketSpy = jest.spyOn(Ticket, 'findOne').mockReturnValue(
+            Promise.resolve(createdTicketBody));
+        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
+            Promise.resolve(savedUserObj));
+
+        /**
+         * Execute the code
+         */
+        await ticketController.updateTicket(req, res);
+
+        /**
+         * Validation
+         */
+        expect(ticketSpy).toHaveBeenCalled();
+        expect(userSpy).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(200);
+
+
+        
+
+    })
 })

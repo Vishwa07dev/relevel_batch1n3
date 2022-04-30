@@ -187,9 +187,10 @@ exports.updateTicket = async (req, res) => {
     /**
      * Only the ticket request be allowed to update the ticket
      */
-    const user = User.findOne({
+    const user = await User.findOne({
         userId: req.userId
     });
+    
     /**
      * Only checking for the user who has created the ticket
      * 
@@ -205,6 +206,7 @@ exports.updateTicket = async (req, res) => {
     if(ticket.assignee == undefined){
         ticket.assignee = req.userId;
     }
+    console.log(user.userType);
     console.log(req.userId);
     if ((user.ticketsCreated == undefined || !user.ticketsCreated.includes(req.params.id)) && !(user.userType== constants.userTypes.admin) && !(ticket.assignee == req.userId)) {
         return res.status(403).send({
