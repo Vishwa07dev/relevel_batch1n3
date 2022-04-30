@@ -100,7 +100,12 @@ describe("Testing create ticket feature", () => {
 
     });
 
-    it("Not able to create a ticket- Error", ()=>{
+    it("Not able to create a ticket- Error", async ()=>{
+
+
+
+
+
 
 
         /**
