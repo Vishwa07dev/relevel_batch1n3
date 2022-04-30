@@ -101,11 +101,14 @@ describe("Testing create ticket feature", () => {
     });
 
     it("Not able to create a ticket- Error", async ()=>{
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> 3969e5ac03eb9dc9ee7e5a010c263b4655af59e9
 
 
         /**
@@ -114,7 +117,41 @@ describe("Testing create ticket feature", () => {
             message: "Some internal error"
         }
          */
+        const req = mockRequest();
+        const res = mockResponse();
+
+        req.body = ticketRequestBody;
+        req.userId = 1;
+
+        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
+            Promise.resolve(savedUserObj));
+
+        //This should return an error
+        const ticketSpy = jest.spyOn(Ticket, 'create').mockImplementation(
+                cb => cb(new Error ("Error while creating"), null));
+
+        await ticketController.createTicket(req, res);
+
+
+        /**
+         * Validation
+         */
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            message: "Some internal error"
+        })
+
+
     })
 
 
 });
+
+describe("Testing update ticket feature", ()=>{
+
+
+    /**
+     * Write a test for the happy flow for updating an existing ticket
+     */
+})
