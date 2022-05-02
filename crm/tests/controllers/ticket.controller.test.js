@@ -9,167 +9,158 @@ const Ticket = require("../../models/ticket.model");
 const client = require("../../utils/NotificationServiceClient").client;
 
 const ticketRequestBody = {
-    title: "Test",
-    ticketPriority: 4,
-    description: "Test"
-}
+  title: "Test",
+  ticketPriority: 4,
+  description: "Test",
+};
 const createdTicketBody = {
-    _id: "saffs2324",
-    title: "Test",
-    ticketPriority: 4,
-    description: "Test",
-    status: "OPEN",
-    reporter: 1,
-    assignee: 1,
-    createdAt : Date.now(),
-    updatedAt : Date.now()
-}
+  _id: "saffs2324",
+  title: "Test",
+  ticketPriority: 4,
+  description: "Test",
+  status: "OPEN",
+  reporter: 1,
+  assignee: 1,
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
+};
 const savedUserObj = {
-    userType: "CUSTOMER",
-    password: "323fser4353",
-    name: "Test",
-    userId: 1,
-    email: "test@relevel.com",
-    ticketsCreated: [],
-    ticketsAssigned: [],
-    save: jest.fn() //mock it
-}
+  userType: "CUSTOMER",
+  password: "323fser4353",
+  name: "Test",
+  userId: 1,
+  email: "test@relevel.com",
+  ticketsCreated: [],
+  ticketsAssigned: [],
+  save: jest.fn(), //mock it
+};
 
 /**
  * Test the create ticket functionality
  */
 describe("Testing create ticket feature", () => {
+  it("unit test the ability to successfully create a new ticket", async () => {
+    /**
+     * External entities we depend on :
+     * 1.req, res
+     */
+    const req = mockRequest();
+    const res = mockResponse();
 
-    it("unit test the ability to successfully create a new ticket", async () => {
+    /**
+     * If I have to call the create ticket method,
+     * this req, needs to have the body object
+     */
+    req.body = ticketRequestBody;
+    req.userId = 1; // My request is ready
 
-        /**
-         * External entities we depend on :
-         * 1.req, res
-         */
-        const req = mockRequest();
-        const res = mockResponse();
+    /**
+     * Mocking and spying User findOne method
+     */
+    const userSpy = jest
+      .spyOn(User, "findOne")
+      .mockReturnValue(Promise.resolve(savedUserObj));
 
-        /**
-         * If I have to call the create ticket method, 
-         * this req, needs to have the body object
-         */
-        req.body = ticketRequestBody;
-        req.userId = 1;  // My request is ready
+    /**
+     * Mock the ticket creation also
+     */
+    const ticketSpy = jest
+      .spyOn(Ticket, "create")
+      .mockImplementation((ticketRequestBody) =>
+        Promise.resolve(createdTicketBody)
+      );
 
-        /**
-         * Mocking and spying User findOne method
-         */
-        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
-            Promise.resolve(savedUserObj));
+    /**
+     * Mock the email client
+     */
+    const clientSpy = jest
+      .spyOn(client, "post")
+      .mockImplementation((url, args, cb) => cb("Test", null));
 
-        /**
-         * Mock the ticket creation also
-         */
-        const ticketSpy = jest.spyOn(Ticket, 'create').mockImplementation(
-            (ticketRequestBody) => Promise.resolve(createdTicketBody));
+    /**
+     * Execution of the test
+     */
+    await ticketController.createTicket(req, res);
 
-        /**
-         * Mock the email client
-         */
-        const clientSpy = jest.spyOn(client, 'post').mockImplementation(
-            (url, args, cb) => cb('Test', null));
+    /**
+     * Validations
+     */
+    expect(userSpy).toHaveBeenCalled();
+    expect(ticketSpy).toHaveBeenCalled();
+    expect(clientSpy).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Test",
+        ticketPriority: 4,
+        description: "Test",
+        status: "OPEN",
+        assignee: 1,
+      })
+    );
+  });
 
-
-        /**
-         * Execution of the test
-         */
-        await ticketController.createTicket(req, res);
-
-        /**
-         * Validations
-         */
-        expect(userSpy).toHaveBeenCalled();
-        expect(ticketSpy).toHaveBeenCalled();
-        expect(clientSpy).toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.send).toHaveBeenCalledWith(
-            expect.objectContaining({
-                title: "Test",
-                ticketPriority: 4,
-                description: "Test",
-                status: "OPEN",
-                assignee: 1
-
-            })
-        )
-
-    });
-
-    it("Not able to create a ticket- Error", async ()=>{
-
-
-
-
-
-
-
-
-        /**
+  it("Not able to create a ticket- Error", async () => {
+    /**
          * res status code : 500
          * res send message : {
             message: "Some internal error"
         }
          */
-        const req = mockRequest();
-        const res = mockResponse();
+    const req = mockRequest();
+    const res = mockResponse();
 
-        req.body = ticketRequestBody;
-        req.userId = 1;
+    req.body = ticketRequestBody;
+    req.userId = 1;
 
-        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
-            Promise.resolve(savedUserObj));
+    const userSpy = jest
+      .spyOn(User, "findOne")
+      .mockReturnValue(Promise.resolve(savedUserObj));
 
-        //This should return an error
-        const ticketSpy = jest.spyOn(Ticket, 'create').mockImplementation(
-                cb => cb(new Error ("Error while creating"), null));
+    //This should return an error
+    const ticketSpy = jest
+      .spyOn(Ticket, "create")
+      .mockImplementation((cb) => cb(new Error("Error while creating"), null));
 
-        await ticketController.createTicket(req, res);
+    await ticketController.createTicket(req, res);
 
+    /**
+     * Validation
+     */
 
-        /**
-         * Validation
-         */
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.send).toHaveBeenCalledWith({
-            message: "Some internal error"
-        })
-
-
-    })
-
-
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      message: "Some internal error",
+    });
+  });
 });
 
-describe("Testing update ticket feature", ()=>{
+describe("Testing update ticket feature", () => {
+  it("unit test the ability to successfully update a ticket", async () => {
+    const req = mockRequest();
+    const res = mockResponse();
 
-    it("unit test the ability to successfully update a ticket", async () => {
+    req.body = ticketRequestBody;
+    req.userId = 1;
 
-        const req = mockRequest();
-        const res = mockResponse();
+    const userSpy = jest
+      .spyOn(User, "findOne")
+      .mockReturnValue(Promise.resolve(savedUserObj));
 
-        req.body = ticketRequestBody
-        req.userId =1
+    const ticketSpy = jest
+      .spyOn(Ticket, "update")
+      .mockImplementation((ticketRequestBody) =>
+        Promise.resolve(updatedTicketBody)
+      );
 
-        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
-            Promise.resolve(savedUserObj));
+    const clientSpy = jest
+      .spyOn(client, "put")
+      .mockImplementation((url, args, cb) => cb("Test", null));
 
-            const ticketSpy = jest.spyOn(Ticket, 'update').mockImplementation(
-                (ticketRequestBody) => Promise.resolve(updatedTicketBody));
-    
-                const clientSpy = jest.spyOn(client, 'put').mockImplementation(
-                    (url, args, cb) => cb('Test', null));
-
-                    await ticketController.updateTicket(req, res);
+    await ticketController.updateTicket(req, res);
 
     /**
      * Write a test for the happy flow for updating an existing ticket
      */
-    
-    }
-})
+  });
+});
