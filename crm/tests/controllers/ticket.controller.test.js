@@ -148,8 +148,28 @@ describe("Testing create ticket feature", () => {
 
 describe("Testing update ticket feature", ()=>{
 
+    it("unit test the ability to successfully update a ticket", async () => {
+
+        const req = mockRequest();
+        const res = mockResponse();
+
+        req.body = ticketRequestBody
+        req.userId =1
+
+        const userSpy = jest.spyOn(User, 'findOne').mockReturnValue(
+            Promise.resolve(savedUserObj));
+
+            const ticketSpy = jest.spyOn(Ticket, 'update').mockImplementation(
+                (ticketRequestBody) => Promise.resolve(updatedTicketBody));
+    
+                const clientSpy = jest.spyOn(client, 'put').mockImplementation(
+                    (url, args, cb) => cb('Test', null));
+
+                    await ticketController.updateTicket(req, res);
 
     /**
      * Write a test for the happy flow for updating an existing ticket
      */
+    
+    }
 })
