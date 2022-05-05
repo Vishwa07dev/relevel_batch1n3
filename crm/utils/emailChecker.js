@@ -35,16 +35,10 @@ module.exports = (email) => {
     report.otherSpecialCharacters;
 
   if (invalidCharacters) {
-    return {
-      valid: false,
-      message: "Characters in the email is invalid",
-    };
+    return false;
   }
 
   if (report.emailStructureIsValid) {
-    return {
-      valid: true,
-      message: "Email is valid",
-    };
+    return true;
   }
 };
