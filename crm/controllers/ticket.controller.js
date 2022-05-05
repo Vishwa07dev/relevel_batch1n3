@@ -240,6 +240,63 @@ exports.updateTicket = async (req, res) => {
 
   const updatedTicket = await ticket.save();
 
+  //   Logic to send notification to the respective users when a ticket is updated based on the type of the user who wants to update the ticket
+  try {
+    switch (user.userType) {
+      case constants.userTypes.admin:
+        //   send notification to the customer, assignee engineer and the admin
+        {
+          const engineer = await User.findOne({ userId: ticket.assignee });
+          const customer = await User.findOne({ userId: ticket.reporter });
+          const admin = user;
+
+          notificationServiceClient.sendEmail(
+            ticket._id,
+            "Updated the following :" + ticket._id,
+            ticket.description,
+            customer.email + "," + engineer.email + "," + admin.email,
+            admin.email
+          );
+        }
+        break;
+      case constants.userTypes.engineer:
+        //   send notification to the engineer and the customer who reported the ticket
+        {
+          const customer = await User.findOne({ userId: ticket.reporter });
+          const engineer = user;
+
+          notificationServiceClient.sendEmail(
+            ticket._id,
+            "Updated the following :" + ticket._id,
+            ticket.description,
+            customer.email + "," + engineer.email,
+            engineer.email
+          );
+        }
+        break;
+      case constants.userTypes.customer:
+        // send notification to the customer and the engineer to whom the ticket has been assigned
+        {
+          const engineer = await User.findOne({ userId: ticket.assignee });
+          const customer = user;
+
+          notificationServiceClient.sendEmail(
+            ticket._id,
+            "Updated the following :" + ticket._id,
+            ticket.description,
+            customer.email + "," + engineer.email,
+            customer.email
+          );
+        }
+        break;
+    }
+  } catch (error) {
+    console.log(
+      "The following error occurred while sending notification -> \n ",
+      error
+    );
+  }
+
   // Return the updated ticket
 
   return res.status(200).send(objectConverter.ticketResponse(updatedTicket));
